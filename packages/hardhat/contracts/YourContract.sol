@@ -1,78 +1,71 @@
-//SPDX-License-Identifier: MIT
-pragma solidity >=0.8.0 <0.9.0;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 
-// Useful for debugging. Remove when deploying to a live network.
-import "hardhat/console.sol";
+contract Betting {
+    enum BetStatus { Open, Closed }
+    enum Outcome { None, TeamA, TeamB }
 
-// Use openzeppelin to inherit battle-tested implementations (ERC20, ERC721, etc)
-// import "@openzeppelin/contracts/access/Ownable.sol";
-
-/**
- * A smart contract that allows changing a state variable of the contract and tracking the changes
- * It also allows the owner to withdraw the Ether in the contract
- * @author BuidlGuidl
- */
-contract YourContract {
-    // State Variables
-    address public immutable owner;
-    string public greeting = "Building Unstoppable Apps!!!";
-    bool public premium = false;
-    uint256 public totalCounter = 0;
-    mapping(address => uint) public userGreetingCounter;
-
-    // Events: a way to emit log statements from smart contract that can be listened to by external parties
-    event GreetingChange(address indexed greetingSetter, string newGreeting, bool premium, uint256 value);
-
-    // Constructor: Called once on contract deployment
-    // Check packages/hardhat/deploy/00_deploy_your_contract.ts
-    constructor(address _owner) {
-        owner = _owner;
+    struct Bet {
+        address payable bettor;
+        uint256 amount;
+        Outcome outcome;
     }
 
-    // Modifier: used to define a set of rules that must be met before or after a function is executed
-    // Check the withdraw() function
-    modifier isOwner() {
-        // msg.sender: predefined variable that represents address of the account that called the current function
-        require(msg.sender == owner, "Not the Owner");
+    address public owner;
+    BetStatus public status;
+    Bet public betTeamA;
+    Bet public betTeamB;
+    Outcome public winningOutcome;
+
+    event BetPlaced(address indexed bettor, uint256 amount, Outcome outcome);
+    event WinnerDeclared(Outcome winner);
+
+    constructor() {
+        owner = msg.sender;
+        status = BetStatus.Open;
+    }
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only owner can call this function");
         _;
     }
 
-    /**
-     * Function that allows anyone to change the state variable "greeting" of the contract and increase the counters
-     *
-     * @param _newGreeting (string memory) - new greeting to save on the contract
-     */
-    function setGreeting(string memory _newGreeting) public payable {
-        // Print data to the hardhat chain console. Remove when deploying to a live network.
-        console.log("Setting new greeting '%s' from %s", _newGreeting, msg.sender);
+    modifier onlyWhenOpen() {
+        require(status == BetStatus.Open, "Betting is closed");
+        _;
+    }
 
-        // Change state variables
-        greeting = _newGreeting;
-        totalCounter += 1;
-        userGreetingCounter[msg.sender] += 1;
+    function placeBet(Outcome _outcome) external payable onlyWhenOpen {
+        require(msg.value > 0, "Bet amount must be greater than zero");
+        require(_outcome == Outcome.TeamA || _outcome == Outcome.TeamB, "Invalid outcome");
 
-        // msg.value: built-in global variable that represents the amount of ether sent with the transaction
-        if (msg.value > 0) {
-            premium = true;
-        } else {
-            premium = false;
+        if (_outcome == Outcome.TeamA) {
+            require(betTeamA.bettor == address(0), "Bet for Team A already placed");
+            betTeamA = Bet(payable(msg.sender), msg.value, _outcome);
+        } else if (_outcome == Outcome.TeamB) {
+            require(betTeamB.bettor == address(0), "Bet for Team B already placed");
+            betTeamB = Bet(payable(msg.sender), msg.value, _outcome);
         }
 
-        // emit: keyword used to trigger an event
-        emit GreetingChange(msg.sender, _newGreeting, msg.value > 0, msg.value);
+        emit BetPlaced(msg.sender, msg.value, _outcome);
     }
 
-    /**
-     * Function that allows the owner to withdraw all the Ether in the contract
-     * The function can only be called by the owner of the contract as defined by the isOwner modifier
-     */
-    function withdraw() public isOwner {
-        (bool success, ) = owner.call{ value: address(this).balance }("");
-        require(success, "Failed to send Ether");
+    function closeBetting(Outcome _winningOutcome) external onlyOwner {
+        require(status == BetStatus.Open, "Betting is already closed");
+        status = BetStatus.Closed;
+        winningOutcome = _winningOutcome;
+        
+        emit WinnerDeclared(winningOutcome);
+        
+        // Выплата выигрыша
+        if (winningOutcome == Outcome.TeamA && betTeamA.bettor != address(0)) {
+            betTeamA.bettor.transfer(betTeamA.amount + betTeamB.amount);
+        } else if (winningOutcome == Outcome.TeamB && betTeamB.bettor != address(0)) {
+            betTeamB.bettor.transfer(betTeamA.amount + betTeamB.amount);
+        }
     }
 
-    /**
-     * Function that allows the contract to receive ETH
-     */
-    receive() external payable {}
+    function getBetDetails() external view returns (Bet memory, Bet memory, BetStatus, Outcome) {
+        return (betTeamA, betTeamB, status, winningOutcome);
+    }
 }

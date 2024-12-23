@@ -4,6 +4,231 @@
  */
 import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 
-const deployedContracts = {} as const;
+const deployedContracts = {
+  31337: {
+    Betting: {
+      address: "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
+      abi: [
+        {
+          inputs: [],
+          stateMutability: "nonpayable",
+          type: "constructor",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "bettor",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "enum Betting.Outcome",
+              name: "outcome",
+              type: "uint8",
+            },
+          ],
+          name: "BetPlaced",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "enum Betting.Outcome",
+              name: "winner",
+              type: "uint8",
+            },
+          ],
+          name: "WinnerDeclared",
+          type: "event",
+        },
+        {
+          inputs: [],
+          name: "betTeamA",
+          outputs: [
+            {
+              internalType: "address payable",
+              name: "bettor",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+            {
+              internalType: "enum Betting.Outcome",
+              name: "outcome",
+              type: "uint8",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "betTeamB",
+          outputs: [
+            {
+              internalType: "address payable",
+              name: "bettor",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+            {
+              internalType: "enum Betting.Outcome",
+              name: "outcome",
+              type: "uint8",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "enum Betting.Outcome",
+              name: "_winningOutcome",
+              type: "uint8",
+            },
+          ],
+          name: "closeBetting",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "getBetDetails",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "address payable",
+                  name: "bettor",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "amount",
+                  type: "uint256",
+                },
+                {
+                  internalType: "enum Betting.Outcome",
+                  name: "outcome",
+                  type: "uint8",
+                },
+              ],
+              internalType: "struct Betting.Bet",
+              name: "",
+              type: "tuple",
+            },
+            {
+              components: [
+                {
+                  internalType: "address payable",
+                  name: "bettor",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "amount",
+                  type: "uint256",
+                },
+                {
+                  internalType: "enum Betting.Outcome",
+                  name: "outcome",
+                  type: "uint8",
+                },
+              ],
+              internalType: "struct Betting.Bet",
+              name: "",
+              type: "tuple",
+            },
+            {
+              internalType: "enum Betting.BetStatus",
+              name: "",
+              type: "uint8",
+            },
+            {
+              internalType: "enum Betting.Outcome",
+              name: "",
+              type: "uint8",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "owner",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "enum Betting.Outcome",
+              name: "_outcome",
+              type: "uint8",
+            },
+          ],
+          name: "placeBet",
+          outputs: [],
+          stateMutability: "payable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "status",
+          outputs: [
+            {
+              internalType: "enum Betting.BetStatus",
+              name: "",
+              type: "uint8",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "winningOutcome",
+          outputs: [
+            {
+              internalType: "enum Betting.Outcome",
+              name: "",
+              type: "uint8",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+      ],
+      inheritedFunctions: {},
+    },
+  },
+} as const;
 
 export default deployedContracts satisfies GenericContractsDeclaration;
